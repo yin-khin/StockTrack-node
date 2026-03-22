@@ -10,17 +10,40 @@ const config = require(__dirname + '/../config/config.json')[env];
 const db = {};
 
 let sequelize;
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('Config:', JSON.stringify(config, null, 2));
+
 if (config.use_env_variable) {
-  sequelize = new Sequelize(process.env[config.use_variable], config);
+  console.log('Using DATABASE_URL approach');
+  sequelize = new Sequelize(process.env[config.use_env_variable], config);
 } else {
+  console.log('Using individual DB variables approach');
+  console.log('DB_HOST:', process.env.DB_HOST);
+  console.log('DB_NAME:', process.env.DB_NAME);
+  console.log('DB_USER:', process.env.DB_USER);
+  console.log('DB_PORT:', process.env.DB_PORT);
+
+  const dbName = config.database || process.env.DB_NAME;
+  const dbUser = config.username || process.env.DB_USER;
+  const dbPassword = config.password || process.env.DB_PASSWORD;
+  const dbHost = config.host || process.env.DB_HOST;
+  const dbPort = config.port || process.env.DB_PORT;
+
+  console.log('Final values - Name:', dbName, 'User:', dbUser, 'Host:', dbHost, 'Port:', dbPort);
+
+  if (!dbName || !dbUser || !dbHost) {
+    console.error('Missing required database configuration!');
+    throw new Error('Database configuration incomplete');
+  }
+
   sequelize = new Sequelize(
-    config.database || process.env.DB_NAME,
-    config.username || process.env.DB_USER,
-    config.password || process.env.DB_PASSWORD,
+    dbName,
+    dbUser,
+    dbPassword,
     {
-      host: config.host || process.env.DB_HOST,
+      host: dbHost,
       dialect: config.dialect,
-      port: config.port || process.env.DB_PORT,
+      port: dbPort,
       logging: config.logging !== undefined ? config.logging : false,
       dialectOptions: config.dialectOptions || {
         ssl: {
