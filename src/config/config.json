@@ -14,7 +14,10 @@
     "dialect": "mysql"
   },
   "production": {
-    "use_env_variable": "DATABASE_URL",
+    "username": null,
+    "password": null,
+    "database": null,
+    "host": null,
     "dialect": "mysql",
     "dialectOptions": {
       "ssl": {

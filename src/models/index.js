@@ -13,7 +13,23 @@ let sequelize;
 if (config.use_env_variable) {
   sequelize = new Sequelize(process.env[config.use_variable], config);
 } else {
-  sequelize = new Sequelize(config.database, config.username, config.password, config);
+  sequelize = new Sequelize(
+    config.database || process.env.DB_NAME,
+    config.username || process.env.DB_USER,
+    config.password || process.env.DB_PASSWORD,
+    {
+      host: config.host || process.env.DB_HOST,
+      dialect: config.dialect,
+      port: config.port || process.env.DB_PORT,
+      logging: config.logging !== undefined ? config.logging : false,
+      dialectOptions: config.dialectOptions || {
+        ssl: {
+          require: true,
+          rejectUnauthorized: false,
+        },
+      },
+    }
+  );
 }
 
 fs
