@@ -13,9 +13,21 @@ let sequelize;
 console.log('NODE_ENV:', process.env.NODE_ENV);
 console.log('Config:', JSON.stringify(config, null, 2));
 
-if (config.use_env_variable) {
+const dbUrl = process.env.DATABASE_URL || process.env.MYSQL_DATABASE_URL;
+const useEnvVariable = dbUrl || config.use_env_variable;
+
+if (useEnvVariable) {
   console.log('Using DATABASE_URL approach');
-  sequelize = new Sequelize(process.env[config.use_env_variable], config);
+  sequelize = new Sequelize(dbUrl || process.env[config.use_env_variable], {
+    dialect: 'mysql',
+    logging: false,
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false,
+      },
+    },
+  });
 } else {
   console.log('Using individual DB variables approach');
   console.log('DB_HOST:', process.env.DB_HOST);
